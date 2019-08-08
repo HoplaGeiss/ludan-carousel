@@ -1,0 +1,14 @@
+$primary: #e3875a;
+$grey: #dddddd;
+
+.arrow {
+  height: 120px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  &:hover {
+    background: $grey;
+  }
+}

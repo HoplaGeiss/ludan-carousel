@@ -1,3 +1,6 @@
+$primary: #e3875a;
+$grey: #dddddd;
+
 .wrapper {
   width: 100%;
   position: relative;
@@ -5,7 +8,6 @@
 
 .carousel-wrapper {
   box-sizing: border-box;
-  padding: 0 40px;
   overflow: hidden;
   width: 100%;
   position: relative;
@@ -16,6 +18,7 @@
   overflow: hidden;
   transition-duration: 1000ms;
   display: flex;
+  margin: 0 40px;
 }
 
 ul {
@@ -24,20 +27,19 @@ ul {
   float: left;
   width: 100%;
   display: flex;
+  padding: 0;
+  margin: 0;
 }
 
 li {
   width: 130px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
 }
 
 .arrow-left,
 .arrow-right {
   position: absolute;
-  top: 6px;
-  bottom: 6px;
+  top: 0px;
+  bottom: 0px;
   width: 40px;
   display: flex;
   justify-content: center;
@@ -49,22 +51,17 @@ li {
 
   &:not(.disabled):hover {
     cursor: pointer;
-    background: orange;
+    background: $primary;
 
-    i {
-      color: white;
+    .icon {
+      fill: white;
     }
   }
 
   &.disabled {
-    i {
-      color: grey !important;
+    .icon {
+      fill: $grey !important;
     }
-  }
-
-  i {
-    font-size: 3.2em;
-    pointer-events: none;
   }
 }
 
