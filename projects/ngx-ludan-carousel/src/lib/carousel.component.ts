@@ -15,7 +15,10 @@ import { CarouselItemComponent } from './carousel-item/carousel-item.component';
       <div class="carousel-wrapper">
         <div class="carousel">
           <ul *ngFor="let items of batches">
-            <li *ngFor="let item of items">
+            <li
+              *ngFor="let item of items; let i = index"
+              (click)="selectItem(item, i, items.length)"
+            >
               <ng-container
                 *ngTemplateOutlet="item.carouselItem"
               ></ng-container>
@@ -118,9 +121,9 @@ export class CarouselComponent implements OnInit, AfterViewChecked {
     const ulElements = this.elementRef.nativeElement.querySelectorAll('ul');
 
     // Each ul element needs to be 100 / nb batches wide.
-    for (let i = 0; i < ulElements.length; i++) {
-      ulElements[i].style.width = 100 / this.batches.length + '%';
-    }
+    ulElements.forEach(ulElement => {
+      ulElement.style.width = 100 / this.batches.length + '%';
+    });
   }
 
   onResize = () => {
@@ -137,24 +140,21 @@ export class CarouselComponent implements OnInit, AfterViewChecked {
 
       this.renderBatches();
       this.setBatchSize();
+      this.slide(0);
     }
   }
 
-  slideLeft = currentItem => {
-    if (currentItem !== 0) {
-      this.slide(1);
-    }
+  slideLeft = () => {
+    if (this.currentItem !== 0) this.slide(1);
   }
 
-  slideRight = currentItem => {
-    if (currentItem !== this.batches.length - 1) {
-      this.slide(-1);
-    }
+  slideRight = () => {
+    if (this.currentItem !== this.batches.length - 1) this.slide(-1);
   }
 
   slide = (direction: number) => {
     this.currentItem = this.currentItem - direction;
-    this.translation = this.translation + direction * this.increment;
+    this.translation = -this.currentItem * this.increment;
     this.carousel.style.transform = 'translateX(' + this.translation + '%)';
   }
 
@@ -162,5 +162,15 @@ export class CarouselComponent implements OnInit, AfterViewChecked {
     return arr
       .slice(0, ((arr.length + n - 1) / n) | 0)
       .map((c, i) => arr.slice(n * i, n * i + n));
+  }
+
+  selectItem = (item: any, index: number, amount: any) => {
+    if (index > amount) this.slideRight();
+
+    const middleIndex = Math.floor(amount / 2);
+    const translationIndex = middleIndex - index;
+    const translation = (translationIndex * this.increment) / amount;
+    const centerTranslation = this.translation + translation;
+    this.carousel.style.transform = 'translateX(' + centerTranslation + '%)';
   }
 }
