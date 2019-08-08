@@ -8,7 +8,16 @@ $grey: #dddddd;
   justify-content: center;
   align-items: center;
   cursor: pointer;
-  &:hover {
+
+  &.active {
+    background-color: $primary;
+    color: white;
+    .icon {
+      fill: white;
+    }
+  }
+
+  &:hover:not(.active) {
     background: $grey;
   }
 }

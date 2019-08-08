@@ -7,17 +7,20 @@ import {
 } from '@angular/core';
 import { CarouselItemComponent } from './carousel-item/carousel-item.component';
 
+const ICON_WIDTH = 40;
+const ITEM_WIDTH = 130;
+
 @Component({
   selector: 'ludan-carousel',
   styleUrls: ['./carousel.component.scss'],
   template: `
-    <div class="wrapper" (window:resize)="onResize($event)">
+    <div class="wrapper" (window:resize)="onResize()">
       <div class="carousel-wrapper">
         <div class="carousel">
-          <ul *ngFor="let items of batches">
+          <ul>
             <li
               *ngFor="let item of items; let i = index"
-              (click)="selectItem(item, i, items.length)"
+              (click)="translateToItem(i)"
             >
               <ng-container
                 *ngTemplateOutlet="item.carouselItem"
@@ -28,10 +31,10 @@ import { CarouselItemComponent } from './carousel-item/carousel-item.component';
       </div>
 
       <div
-        *ngIf="batches.length > 1"
+        *ngIf="slideNumber > 1"
         class="arrow-left"
-        (click)="slideLeft(currentItem)"
-        [class.disabled]="currentItem === 0"
+        (click)="slideLeft()"
+        [class.disabled]="translation === 0"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -50,10 +53,10 @@ import { CarouselItemComponent } from './carousel-item/carousel-item.component';
       </div>
 
       <div
-        *ngIf="batches.length > 1"
+        *ngIf="slideNumber > 1"
         class="arrow-right"
-        (click)="slideRight(currentItem)"
-        [class.disabled]="currentItem === batches.length - 1"
+        (click)="slideRight()"
+        [class.disabled]="currentSlide === slideNumber - 1"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -75,13 +78,13 @@ import { CarouselItemComponent } from './carousel-item/carousel-item.component';
 })
 export class CarouselComponent implements OnInit, AfterViewChecked {
   items = [];
-  currentItem = 0;
+  currentSlide = 0;
   carousel: any;
   position = 0;
   increment: any;
   translation = 0;
   elementsPerSlide: number;
-  batches: Array<Array<object>> = [];
+  slideNumber: number;
   carouselWidth: number;
   carouselWrapper: any;
   carouselWrapperWidth: number;
@@ -103,27 +106,13 @@ export class CarouselComponent implements OnInit, AfterViewChecked {
   }
 
   renderBatches = () => {
-    const itemWidth = 130;
-
-    // we split the items in batches
-    this.elementsPerSlide = Math.floor(this.carouselWrapperWidth / itemWidth);
-    this.batches = this.chunk(this.items, this.elementsPerSlide);
+    this.elementsPerSlide = Math.floor(this.carouselWrapperWidth / ITEM_WIDTH);
+    this.slideNumber = Math.ceil(this.items.length / this.elementsPerSlide);
 
     // The carousel is 100 * ng batches wide
-    this.carousel.style.width = 100 * this.batches.length + '%';
-
-    this.increment = 100 / this.batches.length;
-
+    this.carousel.style.width = 100 * this.slideNumber + '%';
+    this.increment = 100 / this.slideNumber;
     this.changeDetectorRef.detectChanges();
-  }
-
-  setBatchSize = () => {
-    const ulElements = this.elementRef.nativeElement.querySelectorAll('ul');
-
-    // Each ul element needs to be 100 / nb batches wide.
-    ulElements.forEach(ulElement => {
-      ulElement.style.width = 100 / this.batches.length + '%';
-    });
   }
 
   onResize = () => {
@@ -136,41 +125,31 @@ export class CarouselComponent implements OnInit, AfterViewChecked {
       this.carouselWrapper.offsetWidth !== 0 &&
       this.carouselWrapper.offsetWidth !== this.carouselWrapperWidth
     ) {
-      this.carouselWrapperWidth = this.carouselWrapper.offsetWidth;
+      this.carouselWrapperWidth =
+        this.carouselWrapper.offsetWidth - 2 * ICON_WIDTH;
 
       this.renderBatches();
-      this.setBatchSize();
-      this.slide(0);
     }
   }
 
   slideLeft = () => {
-    if (this.currentItem !== 0) this.slide(1);
+    this.slide(1);
   }
 
   slideRight = () => {
-    if (this.currentItem !== this.batches.length - 1) this.slide(-1);
+    if (this.currentSlide !== this.slideNumber - 1) this.slide(-1);
   }
 
   slide = (direction: number) => {
-    this.currentItem = this.currentItem - direction;
-    this.translation = -this.currentItem * this.increment;
-    this.carousel.style.transform = 'translateX(' + this.translation + '%)';
+    this.currentSlide = this.currentSlide - direction;
+    if (this.currentSlide < 0) this.currentSlide = 0;
+    this.translation = -this.currentSlide * this.elementsPerSlide * ITEM_WIDTH;
+    this.carousel.style.transform = 'translateX(' + this.translation + 'px)';
   }
 
-  chunk = (arr, n) => {
-    return arr
-      .slice(0, ((arr.length + n - 1) / n) | 0)
-      .map((c, i) => arr.slice(n * i, n * i + n));
-  }
-
-  selectItem = (item: any, index: number, amount: any) => {
-    if (index > amount) this.slideRight();
-
-    const middleIndex = Math.floor(amount / 2);
-    const translationIndex = middleIndex - index;
-    const translation = (translationIndex * this.increment) / amount;
-    const centerTranslation = this.translation + translation;
-    this.carousel.style.transform = 'translateX(' + centerTranslation + '%)';
+  translateToItem = (index: number) => {
+    this.translation = -(index * ITEM_WIDTH);
+    this.currentSlide = Math.floor(index / this.elementsPerSlide);
+    this.carousel.style.transform = 'translateX(' + this.translation + 'px)';
   }
 }

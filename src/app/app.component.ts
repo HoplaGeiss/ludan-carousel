@@ -6,12 +6,17 @@ import { Component, OnInit } from '@angular/core';
   template: `
     <ludan-carousel>
       <ludan-carousel-item *ngFor="let item of items">
-        <div class="arrow">
+        <div
+          class="arrow"
+          (click)="selectItem(item)"
+          [class.active]="item.active"
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 414.295 414.295"
             width="40px"
             height="40px"
+            class="icon"
           >
             <path
               d="M342.804
@@ -48,13 +53,20 @@ import { Component, OnInit } from '@angular/core';
   `
 })
 export class AppComponent implements OnInit {
-  items: Array<{ title: string }>;
+  items: Array<{ title: string; active: boolean }>;
 
   ngOnInit() {
     this.items = Array.from(
       Array(Math.floor(Math.random() * Math.floor(10) + 20)).keys()
     ).map(i => ({
-      title: 'Item ' + i
+      title: 'Item ' + i,
+      active: false
     }));
+  }
+
+  selectItem = item => {
+    this.items.forEach(i => {
+      i.active = i === item ? true : false;
+    });
   }
 }
