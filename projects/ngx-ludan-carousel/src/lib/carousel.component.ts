@@ -77,16 +77,13 @@ const ITEM_WIDTH = 130;
   `
 })
 export class CarouselComponent implements OnInit, AfterViewChecked {
-  items = [];
+  items: CarouselItemComponent[] = [];
   currentSlide = 0;
-  carousel: any;
-  position = 0;
-  increment: any;
+  carousel: HTMLElement;
   translation = 0;
   elementsPerSlide: number;
   slideNumber: number;
-  carouselWidth: number;
-  carouselWrapper: any;
+  carouselWrapper: HTMLElement;
   carouselWrapperWidth: number;
 
   constructor(
@@ -111,7 +108,6 @@ export class CarouselComponent implements OnInit, AfterViewChecked {
 
     // The carousel is 100 * ng batches wide
     this.carousel.style.width = 100 * this.slideNumber + '%';
-    this.increment = 100 / this.slideNumber;
     this.changeDetectorRef.detectChanges();
   }
 
